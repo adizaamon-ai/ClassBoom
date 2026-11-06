@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ClassBloom</title>
+<style>
+:root{--bg:#F7F8FC;--card:#fff;--tx:#252A38;--mut:#6b7285;--pri:#18243A;--lav:#8B7CF6;--sky:#5DADE2;--ok:#39A878;--warn:#F2B84B;--bd:#e6e8f0;--bad:#d9667a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10151f;--card:#1a2232;--tx:#e8eaf2;--mut:#98a0b5;--bd:#2a3347;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10151f;--card:#1a2232;--tx:#e8eaf2;--mut:#98a0b5;--bd:#2a3347;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 "Inter","Segoe UI",system-ui,sans-serif;display:flex;min-height:100vh}
+aside{width:210px;background:#18243A;color:#fff;padding:18px 12px;flex-shrink:0;position:sticky;top:0;height:100vh}
+aside h2{margin:0 8px 2px;font-size:20px}aside small{display:block;margin:0 8px 18px;color:#aab3c8;font-size:11px;line-height:1.3}
+aside button{display:block;width:100%;text-align:left;background:none;border:0;color:#cfd5e4;padding:10px 12px;border-radius:10px;font:inherit;cursor:pointer;margin-bottom:2px}
+aside button:hover{background:#243350}aside button.on{background:var(--lav);color:#fff}
+main{flex:1;padding:24px;min-width:0;max-width:1100px}
+h1{margin:0 0 16px;font-size:24px}h3{margin:0 0 10px;font-size:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 10px rgba(24,36,58,.05)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:16px}.grid .card{margin:0}
+.big{font-size:28px;font-weight:700}.mut{color:var(--mut);font-size:13px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input,select{font:inherit;padding:8px 10px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);min-width:0}
+.btn{background:var(--lav);color:#fff;border:0;border-radius:10px;padding:9px 14px;font:inherit;cursor:pointer}.btn.alt{background:var(--card);color:var(--tx);border:1px solid var(--bd)}.btn.ok{background:var(--ok)}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;border-bottom:1px solid var(--bd)}th{font-size:12px;color:var(--mut);font-weight:600}
+td input{width:76px}td input.cm{width:150px}.wrap{overflow-x:auto}
+.bar{height:10px;border-radius:6px;background:var(--bd);overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--sky),var(--lav))}
+.tag{display:inline-block;background:var(--bg);border:1px solid var(--bd);border-radius:20px;padding:2px 10px;font-size:12px;margin:2px 4px 2px 0}
+.av{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--lav);color:#fff;font-weight:700;margin-right:8px;vertical-align:middle}
+a.l{color:var(--lav);cursor:pointer;font-weight:600}.empty{text-align:center;padding:40px 16px;color:var(--mut)}
+.banner{background:#fff6e0;color:#6b4e00;border-radius:12px;padding:10px 14px;margin-bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+svg text{fill:var(--mut);font-size:10px}
+@media(max-width:760px){body{display:block}aside{width:auto;height:auto;position:static;display:flex;flex-wrap:wrap;gap:4px;padding:10px}aside h2,aside small{display:none}aside button{width:auto;margin:0;padding:8px 10px}main{padding:14px}}
+</style></head><body>
+<aside><h2>🌸 ClassBloom</h2><small>Every Student Has a Story. Every Improvement Matters.</small><div id="nav"></div>
+<button onclick="theme()" style="margin-top:10px">◐ Theme</button></aside>
+<main id="main"></main>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let S={classes:[],students:[],evals:[],w:{hw:20,cw:20,vo:20,te:30,pa:10},demo:false};
+try{const r=localStorage.getItem("cb1");if(r)S=JSON.parse(r)}catch(e){}
+const save=()=>{try{localStorage.setItem("cb1",JSON.stringify(S))}catch(e){}};
+const uid=()=>Math.random().toString(36).slice(2,9);
+const C=[["hw","Homework"],["cw","Classwork"],["vo","Vocabulary"],["te","Test"],["pa","Participation"]];
+const LV=[[0,"Beginner"],[50,"Explorer"],[120,"Achiever"],[250,"Rising Star"],[400,"Champion"],[600,"Master"],[900,"Legend"]];
+let V="dash",J={cls:"",date:new Date().toISOString().slice(0,10),topic:"",ev:"",cf:0},SEL="",LB="",PT=-1,armed=false;
+function pc(v){v=String(v==null?"":v).trim().toUpperCase();if(!v)return null;if(v==="A")return{s:"A"};if(v==="N")return{s:"N",n:0};const n=parseFloat(v);return isNaN(n)?null:{n:Math.max(0,Math.min(100,n))}}
+function es(sc){let t=0,w=0;C.forEach(([k])=>{const p=pc(sc&&sc[k]);if(p&&p.n!=null){t+=p.n*S.w[k];w+=S.w[k]}});return w?t/w:null}
+const pub=()=>S.evals.filter(e=>e.st==="pub").sort((a,b)=>a.date.localeCompare(b.date));
+const hist=id=>pub().filter(e=>e.sc[id]).map(e=>({e,s:es(e.sc[id])})).filter(h=>h.s!=null);
+function st(id){const h=hist(id),avg=h.length?h.reduce((a,b)=>a+b.s,0)/h.length:null;let xp=0,perf=false,run=0,best=0,hd=0,hn=0;
+ h.forEach(({e})=>{const sc=e.sc[id];C.forEach(([k])=>{const p=pc(sc[k]);if(!p||p.n==null)return;if(p.n>=90)xp+=k==="te"?20:5;if(p.n===100&&k==="te"){perf=true;xp+=50}});
+ const p=pc(sc.hw);if(p&&(p.n!=null)){hn++;if(p.s==="N")run=0;else{hd++;xp+=10;run++;best=Math.max(best,run)}}});
+ const bd=[];if(perf)bd.push("⭐ Perfect Star");if(best>=5)bd.push("🦸 Homework Hero");if(h.length>=2&&h[h.length-1].s-h[0].s>=20)bd.push("🌱 Rising Star");
+ const lv=LV.filter(l=>xp>=l[0]).pop()[1];return{h,avg,xp,bd,lv,hw:hn?hd/hn*100:null}}
+const f=v=>v==null?"–":Math.round(v)+"%";
+const cname=id=>(S.classes.find(c=>c.id===id)||{name:"?"}).name;
+function rank(cid){return S.students.filter(s=>!cid||s.cls===cid).map(s=>({s,...st(s.id)})).sort((a,b)=>(b.avg==null?-1:b.avg)-(a.avg==null?-1:a.avg))}
+const empty=m=>`<div class="card empty"><div style="font-size:34px">🌱</div>${m}</div>`;
+const ini=n=>esc(n.trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase());
+function attention(){return S.students.map(s=>({s,...st(s.id)})).filter(x=>x.h.length&&(x.avg<60||x.h[x.h.length-1].s<60)).map(x=>x)}
+function render(){const N=[["dash","Dashboard"],["cls","Classrooms & Students"],["jr","Evaluation Journal"],["lb","Leaderboard"],["pf","Student Profile"],["set","Settings"]];
+ $("#nav").innerHTML=N.map(n=>`<button class="${V===n[0]?"on":""}" onclick="go('${n[0]}')">${n[1]}</button>`).join("");
+ $("#main").innerHTML=(S.demo?`<div class="banner">Demonstration data is shown. <button class="btn alt" onclick="clearAll()">${armed?"Click again to confirm":"Remove demo data"}</button></div>`:"")+({dash,cls,jr,lb,pf,set})[V]()}
+const go=v=>{V=v;armed=false;render()};
+function theme(){const r=document.documentElement,d=getComputedStyle(r).getPropertyValue("--bg").trim()==="#10151f";r.dataset.theme=d?"light":"dark"}
+function dash(){const ev=pub(),all=S.students.map(s=>st(s.id)).filter(x=>x.avg!=null),avg=all.length?all.reduce((a,b)=>a+b.avg,0)/all.length:null,at=attention(),top=rank().filter(x=>x.avg!=null).slice(0,5);
+ if(!S.classes.length)return`<h1>Overview</h1>${empty(`Welcome to ClassBloom. Create your first classroom, or <a class="l" onclick="seed()">load demo data</a> to explore.`)}`;
+ return`<h1>Overview</h1><div class="grid">${[["Students",S.students.length],["Classrooms",S.classes.length],["Average performance",f(avg)],["Published evaluations",ev.length],["Excellent (90%+)",all.filter(x=>x.avg>=90).length],["Needs attention",at.length]].map(c=>`<div class="card"><div class="mut">${c[0]}</div><div class="big">${c[1]}</div></div>`).join("")}</div>
+ <div class="card"><h3>Classroom comparison</h3>${S.classes.map(c=>{const r=rank(c.id).filter(x=>x.avg!=null),a=r.length?r.reduce((x,y)=>x+y.avg,0)/r.length:null;return`<div class="row" style="margin:8px 0"><div style="width:190px">${esc(c.name)}</div><div class="bar" style="flex:1;min-width:100px"><i style="width:${a||0}%"></i></div><b>${f(a)}</b></div>`}).join("")}</div>
+ <div class="card"><h3>Top performers</h3>${top.length?top.map((x,i)=>`<div style="padding:6px 0"><span class="av">${ini(x.s.name)}</span><a class="l" onclick="openP('${x.s.id}')">${esc(x.s.name)}</a> <span class="mut">${esc(cname(x.s.cls))}</span> · <b>${f(x.avg)}</b> ${x.bd.map(b=>`<span class="tag">${b}</span>`).join("")}</div>`).join(""):`<span class="mut">Publish an evaluation to see rankings.</span>`}</div>
+ <div class="card"><h3>Attention required <span class="mut">(private suggestions)</span></h3>${at.length?at.map(x=>`<div style="padding:4px 0"><a class="l" onclick="openP('${x.s.id}')">${esc(x.s.name)}</a> — latest results are below the 60% target. <span class="mut">Suggested: review recent homework or arrange extra revision.</span></div>`).join(""):`<span class="mut">Nothing needs attention right now.</span>`}</div>`}
+function cls(){return`<h1>Classrooms & Students</h1><div class="card"><h3>Add classroom</h3><div class="row"><input id="cn" placeholder="Name, e.g. Group A – Elementary"><input id="cl" placeholder="Level"><button class="btn" onclick="addClass()">Add classroom</button></div></div>
+ <div class="card"><h3>Add student</h3>${S.classes.length?`<div class="row"><input id="sn" placeholder="Full name"><select id="sc">${S.classes.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("")}</select><button class="btn" onclick="addStudent()">Add student</button></div>`:`<span class="mut">Create a classroom first.</span>`}</div>
+ ${S.classes.map(c=>{const r=rank(c.id);return`<div class="card"><div class="row" style="justify-content:space-between"><h3>${esc(c.name)} <span class="mut">${esc(c.level||"")}</span></h3>${r.length?"":`<button class="btn alt" onclick="delClass('${c.id}')">Delete empty classroom</button>`}</div>${r.length?`<div class="wrap"><table><tr><th>Student</th><th>Average</th><th>Level</th><th>XP</th></tr>${r.map(x=>`<tr><td><span class="av">${ini(x.s.name)}</span><a class="l" onclick="openP('${x.s.id}')">${esc(x.s.name)}</a></td><td>${f(x.avg)}</td><td>${x.lv}</td><td>${x.xp}</td></tr>`).join("")}</table></div>`:`<span class="mut">No students yet.</span>`}</div>`}).join("")}`}
+function jr(){if(!S.classes.length)return`<h1>Evaluation Journal</h1>${empty("Create a classroom and add students first.")}`;
+ if(!J.cls||!S.classes.find(c=>c.id===J.cls))J.cls=S.classes[0].id;const sts=S.students.filter(s=>s.cls===J.cls),ev=S.evals.find(e=>e.id===J.ev),lock=ev&&ev.st==="pub";
+ let h=`<h1>Evaluation Journal</h1><div class="card"><div class="row"><select onchange="J.cls=this.value;J.ev='';render()">${S.classes.map(c=>`<option value="${c.id}" ${c.id===J.cls?"selected":""}>${esc(c.name)}</option>`).join("")}</select><input type="date" value="${J.date}" onchange="J.date=this.value;J.ev='';render()"><input placeholder="Lesson topic" value="${esc(J.topic)}" oninput="J.topic=this.value"><button class="btn" onclick="openDraft()">Open journal</button></div></div>`;
+ if(!ev)return h+`<div class="card mut">Choose a classroom, date and topic, then open the journal. Enter a mark from 0 to 100. Type <b>N</b> for not submitted (counts as 0 and is flagged), <b>A</b> for absent, or leave blank for not evaluated (both excluded from averages).</div>`;
+ if(!sts.length)return h+empty("This classroom has no students yet.");
+ h+=`<div class="card"><h3>${esc(ev.topic||"Untitled lesson")} · ${ev.date} <span class="tag">${lock?"Published (locked)":"Draft"}</span></h3><div class="wrap"><table><tr><th>Student</th>${C.map(c=>`<th>${c[1]}<br><span class="mut">${S.w[c[0]]}%</span></th>`).join("")}<th>Comment</th><th>Score</th></tr>`+
+ sts.map(s=>{const sc=ev.sc[s.id]||{};return`<tr><td>${esc(s.name)}</td>${C.map(([k])=>`<td>${lock?esc(sc[k]||"–"):`<input value="${esc(sc[k]||"")}" oninput="cell('${s.id}','${k}',this.value)">`}</td>`).join("")}<td>${lock?esc(sc.cm||""):`<input class="cm" value="${esc(sc.cm||"")}" oninput="cell('${s.id}','cm',this.value)">`}</td><td id="r${s.id}"><b>${f(es(sc))}</b></td></tr>`}).join("")+`</table></div>`;
+ if(!lock){h+=J.cf?`<div class="banner" style="margin-top:12px">Publish for ${sts.length} students. Class average: <b>${f(avgEv(ev,sts))}</b>. Published evaluations are locked and update rankings, profiles and badges. <button class="btn ok" onclick="publish()">Confirm publish</button> <button class="btn alt" onclick="J.cf=0;render()">Cancel</button></div>`:`<div class="row" style="margin-top:12px"><button class="btn alt" onclick="saveDraft()">Save draft</button><button class="btn" onclick="J.cf=1;render()">Preview & publish</button></div>`}
+ return h+`</div>`}
+function avgEv(ev,sts){const v=sts.map(s=>es(ev.sc[s.id])).filter(x=>x!=null);return v.length?v.reduce((a,b)=>a+b)/v.length:null}
+function lb(){if(!S.classes.length)return`<h1>Leaderboard</h1>${empty("No classrooms yet.")}`;const r=rank(LB).filter(x=>x.avg!=null),M=["👑","🥈","🥉"];
+ return`<h1>Leaderboard</h1><div class="card"><div class="row"><select onchange="LB=this.value;render()"><option value="">All classrooms</option>${S.classes.map(c=>`<option value="${c.id}" ${c.id===LB?"selected":""}>${esc(c.name)}</option>`).join("")}</select></div></div>${r.length?`<div class="card wrap"><table><tr><th>#</th><th>Student</th><th>Average</th><th>XP · Level</th><th>Badges</th></tr>${r.map((x,i)=>`<tr><td style="font-size:20px">${M[i]||i+1}</td><td><a class="l" onclick="openP('${x.s.id}')">${esc(x.s.name)}</a><div class="mut">${esc(cname(x.s.cls))}</div></td><td><b>${f(x.avg)}</b></td><td>${x.xp} · ${x.lv}</td><td>${x.bd.map(b=>`<span class="tag">${b}</span>`).join("")}</td></tr>`).join("")}</table></div>`:empty("Rankings appear after you publish an evaluation.")}`}
+function openP(id){SEL=id;PT=-1;go("pf")}
+function pf(){if(!S.students.length)return`<h1>Student Profile</h1>${empty("Add students to see their profiles.")}`;
+ if(!S.students.find(s=>s.id===SEL))SEL=S.students[0].id;const s=S.students.find(x=>x.id===SEL),d=st(s.id),h=d.h;
+ let g="";if(h.length){const W=600,H=180,px=i=>h.length<2?W/2:30+i*(W-50)/(h.length-1),py=v=>H-20-v*(H-40)/100;
+ g=`<svg viewBox="0 0 ${W} ${H}" width="100%">${[0,50,100].map(v=>`<line x1="30" x2="${W-10}" y1="${py(v)}" y2="${py(v)}" stroke="var(--bd)"/><text x="2" y="${py(v)+3}">${v}</text>`).join("")}<polyline fill="none" stroke="var(--lav)" stroke-width="2.5" points="${h.map((p,i)=>px(i)+","+py(p.s)).join(" ")}"/>${h.map((p,i)=>`<circle cx="${px(i)}" cy="${py(p.s)}" r="${i===PT?8:6}" fill="${p.e.sc[s.id].hw&&pc(p.e.sc[s.id].hw).s==="N"?"var(--bad)":"var(--sky)"}" style="cursor:pointer" onclick="PT=${i};render()"><title>${p.e.date}</title></circle>`).join("")}</svg>`}
+ const pt=h[PT],sc=pt&&pt.e.sc[s.id];
+ return`<h1>Student Profile</h1><div class="card"><div class="row"><select onchange="SEL=this.value;PT=-1;render()">${S.students.map(x=>`<option value="${x.id}" ${x.id===SEL?"selected":""}>${esc(x.name)}</option>`).join("")}</select></div><div style="margin-top:12px"><span class="av" style="width:56px;height:56px;font-size:20px">${ini(s.name)}</span><b style="font-size:20px">${esc(s.name)}</b> <span class="mut">${esc(cname(s.cls))}</span></div><div style="margin-top:8px">${d.bd.map(b=>`<span class="tag">${b}</span>`).join("")||`<span class="mut">No badges earned yet.</span>`}</div></div>
+ <div class="grid">${[["Overall average",f(d.avg)],["Homework completion",f(d.hw)],["Evaluations",h.length],["XP · Level",d.xp+" · "+d.lv]].map(c=>`<div class="card"><div class="mut">${c[0]}</div><div class="big" style="font-size:22px">${c[1]}</div></div>`).join("")}</div>
+ <div class="card"><h3>Performance over time</h3>${g||`<span class="mut">No published evaluations for this student yet.</span>`}<div class="mut">Click a point for details. Red points mark a missed homework.</div>${pt?`<div class="card" style="margin:10px 0 0;background:var(--bg)"><b>${pt.e.date} · ${esc(pt.e.topic||"Lesson")}</b> — ${f(pt.s)}<br>${C.map(([k,n])=>`${n}: ${esc({N:"Not submitted",A:"Absent"}[String(sc[k]).toUpperCase()]||sc[k]||"Not evaluated")}`).join(" · ")}${sc.cm?`<br><i>${esc(sc.cm)}</i>`:""}</div>`:""}</div>`}
+function set(){return`<h1>Settings</h1><div class="card"><h3>Grading weights (%)</h3><div class="row">${C.map(([k,n])=>`<label class="mut">${n}<br><input type="number" style="width:80px" value="${S.w[k]}" onchange="S.w['${k}']=+this.value;save()"></label>`).join("")}</div><p class="mut">Missing categories are left out and the remaining weights are rescaled.</p></div><div class="card"><h3>Data</h3><p class="mut">This prototype stores data in this browser only. Do not enter real student records. A production version needs a secure database and teacher login.</p><div class="row"><button class="btn alt" onclick="seed()">Load demo data</button><button class="btn alt" onclick="clearAll()">${armed?"Click again to confirm":"Erase all data"}</button></div></div>`}
+function addClass(){const n=$("#cn").value.trim();if(!n)return;S.classes.push({id:uid(),name:n,level:$("#cl").value.trim()});save();render()}
+function addStudent(){const n=$("#sn").value.trim();if(!n)return;S.students.push({id:uid(),name:n,cls:$("#sc").value,joined:new Date().toISOString().slice(0,10)});save();render()}
+function delClass(id){S.classes=S.classes.filter(c=>c.id!==id);save();render()}
+function openDraft(){let e=S.evals.find(x=>x.cls===J.cls&&x.date===J.date);if(!e){e={id:uid(),cls:J.cls,date:J.date,topic:J.topic,st:"draft",sc:{}};S.evals.push(e)}else if(!J.topic)J.topic=e.topic;else if(e.st==="draft")e.topic=J.topic;J.ev=e.id;J.cf=0;save();render()}
+function cell(sid,k,v){const e=S.evals.find(x=>x.id===J.ev);(e.sc[sid]=e.sc[sid]||{})[k]=v;const el=$("#r"+sid);if(el)el.innerHTML="<b>"+f(es(e.sc[sid]))+"</b>";save()}
+function saveDraft(){const e=S.evals.find(x=>x.id===J.ev);e.topic=J.topic;save();alert("Draft saved.")}
+function publish(){const e=S.evals.find(x=>x.id===J.ev);e.topic=J.topic||e.topic;e.st="pub";J.cf=0;save();V="lb";LB=e.cls;render()}
+function clearAll(){if(!armed){armed=true;render();return}S={classes:[],students:[],evals:[],w:S.w,demo:false};armed=false;J.ev="";save();render()}
+function seed(){let n=0;const r=()=>{n=(n*9301+49297)%233280;return n/233280};n=7;
+ const cs=[["Group A – Elementary","A2"],["Group B – Pre-Intermediate","B1"]].map(c=>({id:uid(),name:c[0],level:c[1]})),names=[["Amina Karimova",0],["Timur Alimov",0],["Sofia Petrova",0],["Jasur Rahimov",1],["Nilufar Saidova",1],["Daniel Brown",1]];
+ const ss=names.map((x,i)=>({id:uid(),name:x[0],cls:cs[x[1]].id,joined:"2026-09-01",b:55+i*6}));
+ const dates=["2026-09-15","2026-09-29","2026-10-13","2026-10-27","2026-11-03","2026-11-05"],evs=[];
+ cs.forEach(c=>dates.forEach((d,di)=>{const e={id:uid(),cls:c.id,date:d,topic:["Daily routines","Present Simple","Food & drink","Past Simple","Travel","Review"][di],st:"pub",sc:{}};
+  ss.filter(s=>s.cls===c.id).forEach(s=>{const g=k=>String(Math.min(100,Math.round(s.b+di*3+r()*22)));const o={hw:r()<.15?"N":g(),cw:g(),vo:g(),te:g(),pa:g()};if(r()<.08)o.pa="A";if(s.name==="Amina Karimova"&&di===5)o.te="100";e.sc[s.id]=o});evs.push(e)}));
+ S.classes=cs;S.students=ss;S.evals=evs;S.demo=true;save();go("dash")}
+render();
+</script></body></html>
